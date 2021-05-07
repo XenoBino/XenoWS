@@ -1,16 +1,34 @@
 #include "XenoWS/shell.h"
+#include "XenoWS/utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 #include <arpa/inet.h>
+#include <getopt.h>
 
 void show_usage(char code)
 {
-	printf("Usage: %s ip port\n", program_name);
+	fprintf(stderr, "Usage: %s [-A ip:port] -D [PATH]\n", program_name);
 	exit(code);
 }
+
+void show_version(char code)
+{
+	fprintf(stderr, "%s 1.0.0\n", program_name);
+	exit(code);
+}
+
+#define	XenoWS_OPTS	"-A:a:D:d:hv"
+static struct option XenoWS_OPTS_long[] = {
+	{"address", required_argument, NULL, 'a'},
+	{"directory", required_argument, NULL, 'd'},
+	{"help", no_argument, NULL, 'h'},
+	{"version", no_argument, NULL, 'h'},
+	{NULL, 0, NULL, '\0'}
+};
 
 XenoWS_Options *parse_args(int argc, char **argv)
 {
@@ -22,16 +40,41 @@ XenoWS_Options *parse_args(int argc, char **argv)
 	XenoWS_Options *ret = (XenoWS_Options *)malloc(sizeof(XenoWS_Options));
 	memset(ret, 0x00, sizeof(XenoWS_Options));
 
-	struct in_addr *address = (struct in_addr*)malloc(sizeof(struct in_addr));
-	memset(address, 0x00, sizeof(struct in_addr));
+	char *dir = NULL;
 
-	if (!inet_aton(argv[1], address)) {
-		printf("%s: inet_aton(): %s: invalid address!\n", argv[0], argv[1]);
-		exit(1);
+	int opt = 0;
+	while ((opt = getopt_long(argc, argv, XenoWS_OPTS, XenoWS_OPTS_long, NULL)) != -1) {
+		switch (opt) {
+		case 1:
+		case '?':
+			show_usage(1);
+			break;
+
+		case 'A':
+		case 'a':
+			if (parse_address_port(optarg, &ret->addr, &ret->port) != 0) {
+				fprintf(stderr, "%s: %s: Invalid address\n", program_name, optarg);
+			}
+			break;
+
+		case 'D':
+		case 'd':
+			dir = optarg;
+			break;
+
+		case 'h':
+			show_usage(0);
+			break;
+
+		case 'v':
+			show_version(0);
+			break;
+		}
 	}
 
-	ret->addr = address->s_addr;
-	ret->port = atoi(argv[2]);
+	if (dir == NULL) {
+		show_usage(1);
+	}
 
 	return ret;
 }

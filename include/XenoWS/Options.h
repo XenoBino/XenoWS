@@ -4,6 +4,6 @@
 #include "XenoWS/defs.h"
 
 typedef struct {
-	in_addr_t addr;
+	struct in_addr addr;
 	port_t port;
 } XenoWS_Options;
