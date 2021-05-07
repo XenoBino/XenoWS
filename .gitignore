@@ -1,0 +1,8 @@
+
+# Junk
+.type
+
+# Directories
+Build/
+Test/
+.test/
