@@ -6,4 +6,5 @@
 typedef struct {
 	struct in_addr addr;
 	port_t port;
+	char *Directory;
 } XenoWS_Options;

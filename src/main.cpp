@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 	XenoWS_Options *options = parse_args(argc, argv);
 
 	// Start the server
-	XenoWS *server = new XenoWS(options->addr.s_addr, options->port);
+	XenoWS *server = new XenoWS(options->addr.s_addr, options->port, options->Directory);
 	server->Init();
 	server->Start();
 

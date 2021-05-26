@@ -72,9 +72,10 @@ XenoWS_Options *parse_args(int argc, char **argv)
 		}
 	}
 
-	if (dir == NULL) {
+	if (dir == NULL)
 		show_usage(1);
-	}
+
+	ret->Directory = dir;
 
 	return ret;
 }

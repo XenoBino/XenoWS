@@ -1,4 +1,5 @@
 #include "XenoWS/XenoWS.hpp"
+#include "XenoWS/Response.hpp"
 #include "XenoWS/Date.h"
 
 #include <iostream>
@@ -15,7 +16,10 @@
 
 static void doProcessing(int fd, sockaddr_in *address);
 
-XenoWS::XenoWS(in_addr_t address, port_t port) : m_FD(0), m_Address(address), m_Port(port), m_ADDR(nullptr)
+XenoWS::XenoWS(in_addr_t address, port_t port, char *dir) :
+		m_ADDR(nullptr), m_Dir(dir),
+		m_FD(0), m_Address(address),
+		m_Port(port)
 {
 	m_FD = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_FD < 0) {
