@@ -1,20 +1,15 @@
 cflags   = -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -std=gnu17 -pedantic
-cppflags = -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -std=c++11 -pedantic
 ldflags =
 buildir = build/
 
 rule cc
   command = gcc $cflags -c $in -o $out
 
-rule ccpp
-  command = g++ $cppflags -c $in -o $out
-
 rule ld
-  command = g++ $ldflags $in -o $out
+  command = gcc $ldflags $in -o $out
 
-build build/int/Date.o: cc src/Date.c
-build build/int/shell.o: cc src/shell.c
-build build/int/utils.o: cc src/utils.c
-build build/int/XenoWS.o: ccpp src/XenoWS.cpp
-build build/int/main.o: ccpp src/main.cpp
-build build/xenows: ld build/int/Date.o build/int/shell.o build/int/utils.o build/int/XenoWS.o build/int/main.o
+build build/int/date.o: cc src/date.c
+build build/int/die.o: cc src/die.c
+build build/int/main.o: cc src/main.c
+build build/int/oom.o: cc src/oom.c
+build build/xenows: ld build/int/date.o build/int/die.o build/int/main.o build/int/oom.o
