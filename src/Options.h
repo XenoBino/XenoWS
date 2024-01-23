@@ -1,7 +1,7 @@
 #pragma once
 
 #include <netinet/in.h>
-#include "XenoWS/defs.h"
+#include "defs.h"
 
 typedef struct {
 	struct in_addr addr;

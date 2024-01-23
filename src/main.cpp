@@ -1,10 +1,8 @@
-#include <iostream>
+#include "XenoWS.hpp"
+#include "shell.h"
+#include "defs.h"
 
-#include "XenoWS/XenoWS.hpp"
-#include "XenoWS/shell.h"
-#include "XenoWS/defs.h"
-
-char *program_name = const_cast<char *>("");
+char *program_name;
 
 int main(int argc, char **argv)
 {

@@ -1,5 +1,5 @@
-#include "XenoWS/utils.h"
-#include "XenoWS/defs.h"
+#include "utils.h"
+#include "defs.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -133,7 +133,6 @@ int parse_request_info(char *str, size_t length, char *method, char **path, char
 		http_version[1] = 0;
 
 //	printf("str: %p, len: %lu, var_len: %lu, ss: %.*s\n", str, length, var_len, length - var_len, &str[length - var_len]);
-
 
 	return XENOWS_OK;
 }

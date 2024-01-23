@@ -1,7 +1,7 @@
 #pragma once
 
 #include <netdb.h>
-#include "XenoWS/defs.h"
+#include "defs.h"
 
 class XenoWS {
 public:

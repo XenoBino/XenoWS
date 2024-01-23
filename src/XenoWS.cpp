@@ -1,6 +1,6 @@
-#include "XenoWS/XenoWS.hpp"
-#include "XenoWS/Response.hpp"
-#include "XenoWS/Date.h"
+#include "XenoWS.hpp"
+#include "Response.hpp"
+#include "Date.h"
 
 #include <iostream>
 #include <cstdio>

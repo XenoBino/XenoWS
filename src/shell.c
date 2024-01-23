@@ -1,5 +1,5 @@
-#include "XenoWS/shell.h"
-#include "XenoWS/utils.h"
+#include "shell.h"
+#include "utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>

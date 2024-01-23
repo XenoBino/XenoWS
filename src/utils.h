@@ -1,6 +1,6 @@
 #pragma once
 
-#include "XenoWS/defs.h"
+#include "defs.h"
 #include <netinet/in.h>
 #include <stddef.h>
 
