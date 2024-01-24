@@ -11,6 +11,8 @@
 #include "die.h"
 #include "date.h"
 #include "oom.h"
+#include "hashmap.h"
+#include "http.h"
 
 #define REQUEST_LENGTH	2047
 
@@ -61,32 +63,110 @@ int main(int argc, char **argv)
 		}
 
 		if (pid == 0) {
+			size_t req_line_size = 0;
+			size_t req_line_extra = 0;
+			const size_t req_line_cap = 2047;
+			char *req_line = (char*)malloc(req_line_cap + 1);
+			if (!req_line) oom();
+
+			char *req_line_end = NULL;
+			while (req_line_size < req_line_cap) {
+				int r = read(clientfd, &req_line[req_line_size], req_line_cap - req_line_size);
+				if (r == EINTR) continue;
+				if (r == 0) break;
+				if (r < 0) die("read(): %s\n", strno());
+
+				char *cr = memchr(&req_line[req_line_size], '\r', r);
+				req_line_size += r;
+
+				if (cr && cr[1] == '\n') {
+					req_line_end = cr;
+					req_line_extra = &req_line[req_line_size - 1] - &cr[1];
+					break;
+				}
+			}
+
+			if (!req_line_end) {
+				const char *res = "HTTP/1.1 200 OK";
+				write(clientfd, res, strlen(res));
+			}
+
+			req_line[req_line_size] = '\0';
+
+			char *saveptr = NULL;
+
+			char *method   = strtok_r(req_line, " ", &saveptr);
+			char *path     = strtok_r(NULL, " ", &saveptr);
+			char *http_ver = strtok_r(NULL, "\r\n", &saveptr);
+
+			HttpRequest *request = http_req_create();
+
+			// Not an http request
+			if (!method || !path || !http_ver || strncmp(http_ver, "HTTP/", 5)) {
+				free(req_line);
+				close(clientfd);
+				exit(0);
+			}
+
+			if (strcmp(&http_ver[5], "1.1")) {
+				const char *res = "HTTP/1.1 400 Bad Request\r\nServer: XenoWS\r\n\r\nInvalid protocol Version.\r\n";
+				write(clientfd, res, strlen(res));
+				free(req_line);
+				close(clientfd);
+				exit(0);
+			}
+
+			request->version.major = 1;
+			request->version.minor = 1;
+
+			if (strcmp(method, "GET")) {
+				request->method = REQ_METHOD_GET;
+			}
+			else if (strcmp(method, "POST")) {
+				request->method = REQ_METHOD_POST;
+			}
+			else if (strcmp(method, "PUT")) {
+				request->method = REQ_METHOD_PUT;
+			}
+			else if (strcmp(method, "PATCH")) {
+				request->method = REQ_METHOD_PATCH;
+			}
+			else if (strcmp(method, "DELETE")) {
+				request->method = REQ_METHOD_OPTIONS;
+			}
+			else {
+				const char *res = "HTTP/1.1 405 Method Not Allowed\r\nServer: XenoWS\r\n\r\nInvalid HTTP method.\r\n";
+				write(clientfd, res, strlen(res));
+				free(req_line);
+				close(clientfd);
+				exit(0);
+			}
+
+			if (*path != '/') {
+				const char *res = "HTTP/1.1 400 Bad Request\r\nServer: XenoWS\r\n\r\nMalformed request path.\r\n";
+				write(clientfd, res, strlen(res));
+				free(req_line);
+				close(clientfd);
+				exit(0);
+			}
+
+			request->path = path;
+
+			free(req_line);
+			http_req_destroy(request);
+
 			const char *header =
 				"HTTP/1.1 200 OK\r\n"
-				"connection: Keep-Alive\r\n"
-				"content-length: 21\r\n"
-				"content-type: text/html; charset=UTF-8\r\n"
-				"keep-alive: timeout=5, max=100\r\n"
-				"server: XenoWS\r\n";
+				"Connection: Keep-Alive\r\n"
+				"Content-length: 21\r\n"
+				"Content-type: text/html; charset=UTF-8\r\n"
+				"Keep-alive: timeout=5, max=100\r\n"
+				"Server: XenoWS\r\n";
 
 			const char *body = "<p>Hello, World!</p>";
 
 			const size_t header_len = strlen(header);
 			const size_t body_len = strlen(body);
-
-			// REQUEST_LENGTH is capacity, req_size is size
-			size_t req_size = 0;
-			char *req = (char*)malloc(REQUEST_LENGTH);
-			if (!req) oom();
-
-			while (req_size < REQUEST_LENGTH) {
-				int r = read(clientfd, &req[req_size], REQUEST_LENGTH - req_size);
-				if (r == EINTR) continue;
-				if (r == 0) break;
-				if (r < 0) die("read(): %s\n", strno());
-
-				req_size += r;
-			}
 
 			size_t date_len = 0;
 			char *date = get_date_header_string(&date_len);
@@ -103,7 +183,6 @@ int main(int argc, char **argv)
 
 			write(clientfd, res, end - res);
 
-			free(req);
 			free(date);
 			free(res);
 

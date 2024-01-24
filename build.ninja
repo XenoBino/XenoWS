@@ -1,6 +1,6 @@
-cflags   = -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -std=gnu17 -pedantic
+cflags   = -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -std=gnu17 -pedantic
 ldflags =
-buildir = build/
+builddir = build/
 
 rule cc
   command = gcc $cflags -c $in -o $out
@@ -10,6 +10,9 @@ rule ld
 
 build build/int/date.o: cc src/date.c
 build build/int/die.o: cc src/die.c
+build build/int/hashmap.o: cc src/hashmap.c
+build build/int/http.o: cc src/http.c
 build build/int/main.o: cc src/main.c
 build build/int/oom.o: cc src/oom.c
-build build/xenows: ld build/int/date.o build/int/die.o build/int/main.o build/int/oom.o
+build build/int/util.o: cc src/util.c
+build build/xenows: ld build/int/date.o build/int/die.o build/int/hashmap.o build/int/http.o build/int/main.o build/int/oom.o build/int/util.o
